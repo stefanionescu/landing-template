@@ -1,0 +1,10 @@
+{
+  "threshold": 4,
+  "reporters": ["console"],
+  "format": ["bash"],
+  "ignore": ["**/node_modules/**", "**/.artifacts/**", "**/.tools/**"],
+  "minLines": 8,
+  "minTokens": 40,
+  "mode": "strict",
+  "output": ".artifacts/cpd/bash"
+}

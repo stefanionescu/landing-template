@@ -1,0 +1,288 @@
+rules:
+  - id: landing-no-eval
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+      - pattern: setTimeout("...", ...)
+      - pattern: setInterval("...", ...)
+    message: >
+      Code injection risk from dynamic code execution. Avoid eval/new Function
+      and string-based timers.
+    languages: [javascript]
+    severity: ERROR
+    metadata:
+      cwe: ['CWE-94']
+      category: security
+
+  - id: landing-no-child-process-exec
+    pattern-either:
+      - pattern: exec(...)
+      - pattern: execSync(...)
+    message: >
+      Command injection risk from exec/execSync. Use execFile/spawn with
+      explicit argument arrays.
+    languages: [javascript]
+    severity: ERROR
+    metadata:
+      cwe: ['CWE-78']
+      category: security
+
+  - id: landing-no-dynamic-require
+    patterns:
+      - pattern-either:
+          - pattern: require($VAR)
+          - pattern: import($VAR)
+      - pattern-not: require("...")
+      - pattern-not: import("...")
+    message: >
+      Dynamic require/import with a variable path risks loading arbitrary
+      modules. Use static imports.
+    languages: [javascript]
+    severity: ERROR
+    paths:
+      exclude:
+        - '**/build/**'
+    metadata:
+      cwe: ['CWE-94']
+      category: security
+
+  - id: landing-no-spawn-shell-true
+    pattern-either:
+      - pattern: 'spawn(..., { ..., shell: true, ... })'
+      - pattern: 'spawnSync(..., { ..., shell: true, ... })'
+      - pattern: '$CP.spawn(..., { ..., shell: true, ... })'
+      - pattern: '$CP.spawnSync(..., { ..., shell: true, ... })'
+    message: >
+      Avoid spawn/spawnSync with shell:true. This enables shell expansion and
+      increases command injection risk.
+    languages: [javascript]
+    severity: ERROR
+    metadata:
+      cwe: ['CWE-78']
+      category: security
+
+  - id: landing-no-execfile-interpolated-args
+    patterns:
+      - pattern-either:
+          - pattern: execFile($CMD, [..., $ARG, ...], ...)
+          - pattern: execFileSync($CMD, [..., $ARG, ...], ...)
+          - pattern: $CP.execFile($CMD, [..., $ARG, ...], ...)
+          - pattern: $CP.execFileSync($CMD, [..., $ARG, ...], ...)
+      - metavariable-regex:
+          metavariable: $ARG
+          regex: "^`.*\\$\\{.+\\}.*`$"
+    message: >
+      Interpolated template arguments passed to execFile*/child_process.execFile*
+      can enable command injection. Build arguments from validated tokens.
+    languages: [javascript]
+    severity: ERROR
+    metadata:
+      cwe: ['CWE-78']
+      category: security
+
+  - id: landing-no-env-sourced-command
+    patterns:
+      - pattern-either:
+          - pattern: exec(process.env.$VAR, ...)
+          - pattern: execSync(process.env.$VAR, ...)
+          - pattern: execFile(process.env.$VAR, ...)
+          - pattern: execFileSync(process.env.$VAR, ...)
+          - pattern: spawn(process.env.$VAR, ...)
+          - pattern: spawnSync(process.env.$VAR, ...)
+          - pattern: $CP.exec(process.env.$VAR, ...)
+          - pattern: $CP.execSync(process.env.$VAR, ...)
+          - pattern: $CP.execFile(process.env.$VAR, ...)
+          - pattern: $CP.execFileSync(process.env.$VAR, ...)
+          - pattern: $CP.spawn(process.env.$VAR, ...)
+          - pattern: $CP.spawnSync(process.env.$VAR, ...)
+          - pattern: |
+              $CMD = process.env.$VAR
+              ...
+              exec($CMD, ...)
+          - pattern: |
+              $CMD = process.env.$VAR
+              ...
+              execSync($CMD, ...)
+          - pattern: |
+              $CMD = process.env.$VAR
+              ...
+              execFile($CMD, ...)
+          - pattern: |
+              $CMD = process.env.$VAR
+              ...
+              execFileSync($CMD, ...)
+          - pattern: |
+              $CMD = process.env.$VAR
+              ...
+              spawn($CMD, ...)
+          - pattern: |
+              $CMD = process.env.$VAR
+              ...
+              spawnSync($CMD, ...)
+          - pattern: |
+              const $CMD = process.env.$VAR
+              ...
+              exec($CMD, ...)
+          - pattern: |
+              const $CMD = process.env.$VAR
+              ...
+              execSync($CMD, ...)
+          - pattern: |
+              const $CMD = process.env.$VAR
+              ...
+              execFile($CMD, ...)
+          - pattern: |
+              const $CMD = process.env.$VAR
+              ...
+              execFileSync($CMD, ...)
+          - pattern: |
+              const $CMD = process.env.$VAR
+              ...
+              spawn($CMD, ...)
+          - pattern: |
+              const $CMD = process.env.$VAR
+              ...
+              spawnSync($CMD, ...)
+          - pattern: |
+              let $CMD = process.env.$VAR
+              ...
+              exec($CMD, ...)
+          - pattern: |
+              let $CMD = process.env.$VAR
+              ...
+              execSync($CMD, ...)
+          - pattern: |
+              let $CMD = process.env.$VAR
+              ...
+              execFile($CMD, ...)
+          - pattern: |
+              let $CMD = process.env.$VAR
+              ...
+              execFileSync($CMD, ...)
+          - pattern: |
+              let $CMD = process.env.$VAR
+              ...
+              spawn($CMD, ...)
+          - pattern: |
+              let $CMD = process.env.$VAR
+              ...
+              spawnSync($CMD, ...)
+          - pattern: |
+              var $CMD = process.env.$VAR
+              ...
+              exec($CMD, ...)
+          - pattern: |
+              var $CMD = process.env.$VAR
+              ...
+              execSync($CMD, ...)
+          - pattern: |
+              var $CMD = process.env.$VAR
+              ...
+              execFile($CMD, ...)
+          - pattern: |
+              var $CMD = process.env.$VAR
+              ...
+              execFileSync($CMD, ...)
+          - pattern: |
+              var $CMD = process.env.$VAR
+              ...
+              spawn($CMD, ...)
+          - pattern: |
+              var $CMD = process.env.$VAR
+              ...
+              spawnSync($CMD, ...)
+    message: >
+      Avoid sourcing command names directly from process.env. Use a strict
+      allowlist and map env values to fixed commands.
+    languages: [javascript]
+    severity: ERROR
+    metadata:
+      cwe: ['CWE-78']
+      category: security
+
+  - id: landing-no-http-url-literals
+    pattern-regex: "http://(?!localhost|127\\.0\\.0\\.1|0\\.0\\.0\\.0|\\[::1\\]|www\\.sitemaps\\.org/schemas/sitemap/0\\.9|www\\.w3\\.org/)"
+    message: >
+      Insecure HTTP URL detected. Use HTTPS for production endpoints.
+    languages: [javascript]
+    severity: ERROR
+    paths:
+      exclude:
+        - '**/tests/**'
+    metadata:
+      cwe: ['CWE-319']
+      category: security
+
+  - id: landing-no-hardcoded-secrets
+    pattern-regex: '(sk-[a-zA-Z0-9]{20,}|sk_live_[a-zA-Z0-9]+|sk_test_[a-zA-Z0-9]+|eyJhbGciOi[A-Za-z0-9+/=]{20,}|ghp_[a-zA-Z0-9]{36}|xoxb-[0-9]+-[a-zA-Z0-9]+|AKIA[0-9A-Z]{16})'
+    message: >
+      Hardcoded secret detected. Move credentials to environment variables or
+      secret storage.
+    languages: [javascript]
+    severity: ERROR
+    paths:
+      exclude:
+        - '**/tests/**'
+    metadata:
+      cwe: ['CWE-798']
+      category: security
+
+  - id: landing-dom-xss-location-to-html-sinks
+    pattern-either:
+      - pattern: $EL.innerHTML = location.search
+      - pattern: $EL.innerHTML = location.hash
+      - pattern: $EL.innerHTML = window.location.search
+      - pattern: $EL.innerHTML = window.location.hash
+      - pattern: $EL.innerHTML = document.URL
+      - pattern: $EL.innerHTML = document.location
+      - pattern: $EL.innerHTML = new URLSearchParams(location.search).get(...)
+      - pattern: $EL.outerHTML = location.search
+      - pattern: $EL.outerHTML = location.hash
+      - pattern: $EL.outerHTML = window.location.search
+      - pattern: $EL.outerHTML = window.location.hash
+      - pattern: $EL.outerHTML = document.URL
+      - pattern: $EL.outerHTML = document.location
+      - pattern: $EL.outerHTML = new URLSearchParams(location.search).get(...)
+      - pattern: $EL.insertAdjacentHTML(..., location.search)
+      - pattern: $EL.insertAdjacentHTML(..., location.hash)
+      - pattern: $EL.insertAdjacentHTML(..., window.location.search)
+      - pattern: $EL.insertAdjacentHTML(..., window.location.hash)
+      - pattern: $EL.insertAdjacentHTML(..., document.URL)
+      - pattern: $EL.insertAdjacentHTML(..., document.location)
+      - pattern: $EL.insertAdjacentHTML(..., new URLSearchParams(location.search).get(...))
+      - pattern: document.write(location.search)
+      - pattern: document.write(location.hash)
+      - pattern: document.write(window.location.search)
+      - pattern: document.write(window.location.hash)
+      - pattern: document.write(document.URL)
+      - pattern: document.write(document.location)
+      - pattern: document.write(new URLSearchParams(location.search).get(...))
+    message: >
+      Potential DOM XSS. Untrusted URL data flows into HTML sinks
+      (innerHTML/outerHTML/insertAdjacentHTML/document.write).
+    languages: [javascript]
+    severity: ERROR
+    metadata:
+      cwe: ['CWE-79']
+      category: security
+
+  - id: landing-open-redirect-from-url-input
+    pattern-either:
+      - pattern: location.href = new URLSearchParams(location.search).get(...)
+      - pattern: window.location.href = new URLSearchParams(location.search).get(...)
+      - pattern: location.assign(new URLSearchParams(location.search).get(...))
+      - pattern: window.location.assign(new URLSearchParams(location.search).get(...))
+      - pattern: location.replace(new URLSearchParams(location.search).get(...))
+      - pattern: window.location.replace(new URLSearchParams(location.search).get(...))
+      - pattern: location.href = location.search
+      - pattern: location.href = location.hash
+      - pattern: window.location.href = location.search
+      - pattern: window.location.href = location.hash
+    message: >
+      Potential open redirect from URL input. Validate destination with an
+      explicit allowlist before assigning to location.
+    languages: [javascript]
+    severity: ERROR
+    metadata:
+      cwe: ['CWE-601']
+      category: security

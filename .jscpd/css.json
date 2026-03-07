@@ -1,0 +1,16 @@
+{
+  "threshold": 4,
+  "reporters": ["console"],
+  "format": ["css"],
+  "path": ["../styles.css"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/.wrangler/**",
+    "**/pages/landing/*/index.html",
+    "**/pages/legal/*/index.html"
+  ],
+  "minLines": 6,
+  "minTokens": 40,
+  "mode": "strict",
+  "output": ".artifacts/cpd/css"
+}

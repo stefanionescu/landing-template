@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "bannedTerms": [
+    "fixture",
+    "fixtures",
+    "shim",
+    "shims",
+    "if_needed",
+    "ifNeeded",
+    "likely",
+    "belt and suspenders"
+  ],
+  "matching": {
+    "caseInsensitive": true
+  }
+}

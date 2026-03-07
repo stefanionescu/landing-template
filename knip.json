@@ -1,0 +1,50 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "server.js",
+    "build/index.js",
+    "build/steps/*.js",
+    "functions/_middleware.js",
+    "config/**/*.js",
+    "shared/**/*.js",
+    "pages/landing/*/content.js",
+    "linting/**/*.mjs",
+    "linting/**/*.js",
+    "linting/**/*.cjs"
+  ],
+  "project": [
+    "server.js",
+    "build/**/*.js",
+    "functions/**/*.js",
+    "config/**/*.js",
+    "shared/**/*.js",
+    "pages/landing/*/content.js",
+    "linting/**/*.mjs",
+    "linting/**/*.js",
+    "linting/**/*.cjs"
+  ],
+  "ignoreDependencies": [
+    "@commitlint/cli",
+    "linkinator",
+    "markdownlint-rule-extended-ascii",
+    "typos"
+  ],
+  "ignoreBinaries": [
+    "concurrently",
+    "eslint",
+    "html-validate",
+    "htmlhint",
+    "jscpd",
+    "knip",
+    "madge",
+    "markdownlint-cli2",
+    "prettier",
+    "semgrep",
+    "shellcheck",
+    "shfmt",
+    "typos"
+  ],
+  "eslint": {
+    "entry": ["eslint.config.mjs"]
+  }
+}

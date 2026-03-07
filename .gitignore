@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+.wrangler/
+.artifacts/
+linting/.tools/
+
+# Generated files
+pages/landing/*/index.html
+pages/legal/*/index.html
+sitemap.xml
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Claude
+.claude/
+
+# Logs
+*.log
+npm-debug.log*

@@ -1,0 +1,9 @@
+{
+  "entry": [".githooks/pre-commit", ".githooks/pre-push", ".githooks/commit-msg"],
+  "project": [
+    ".githooks/**/*.sh",
+    ".githooks/pre-commit",
+    ".githooks/pre-push",
+    ".githooks/commit-msg"
+  ]
+}

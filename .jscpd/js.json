@@ -1,0 +1,17 @@
+{
+  "threshold": 4,
+  "reporters": ["console"],
+  "format": ["javascript"],
+  "path": ["../server.js", "../build/", "../shared/", "../config/", "../functions/"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/.wrangler/**",
+    "**/config/pages/**",
+    "**/pages/landing/*/index.html",
+    "**/pages/legal/*/index.html"
+  ],
+  "minLines": 8,
+  "minTokens": 40,
+  "mode": "strict",
+  "output": ".artifacts/cpd/js"
+}

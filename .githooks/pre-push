@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+#
+# Pre-push hook orchestrator
+#
+# Bypass:
+#   git push --no-verify
+#   SKIP_HOOKS=1
+#   SKIP_SECURITY_SCANS=1
+#   SKIP_MARKDOWN_LINT=1
+#   SKIP_EXTERNAL_LINKS=1
+#   SKIP_LICENSE_CHECK=1
+#   SKIP_HOOKS_SELF=1
+#
+
+set -euo pipefail
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+HOOKS_DIR="$ROOT_DIR/.githooks/hooks"
+
+source "$ROOT_DIR/.githooks/lib/runtime.sh"
+
+if [[ "${SKIP_HOOKS:-0}" == "1" ]]; then
+  exit 0
+fi
+
+FAILED=0
+
+run_hook_no_stdin "[pre-push] markdown lint" "SKIP_MARKDOWN_LINT" "$HOOKS_DIR/global/lint.sh" --mode=push
+run_hook_no_stdin "[pre-push] security + license" "_NOSKIP" "$HOOKS_DIR/global/security.sh" --mode=push
+run_hook_no_stdin "[pre-push] hooks quality" "SKIP_HOOKS_SELF" "$HOOKS_DIR/self/quality.sh"
+
+if [[ "$FAILED" -eq 1 ]]; then
+  echo -e "${RED}Push blocked. Bypass: git push --no-verify${NC}"
+  exit 1
+fi
+
+exit 0

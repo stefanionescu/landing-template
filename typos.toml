@@ -1,0 +1,20 @@
+[default]
+check-filename = true
+
+[files]
+extend-exclude = [
+  ".wrangler/**",
+  "linting/.tools/**",
+  "node_modules/**",
+  "assets/**",
+  "pages/landing/*/index.html",
+  "pages/legal/*/index.html"
+]
+
+[default.extend-words]
+fancam = "fancam"
+insta = "insta"
+mimosas = "mimosas"
+subtweet = "subtweet"
+tiktok = "tiktok"
+unmute = "unmute"

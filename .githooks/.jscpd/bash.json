@@ -1,0 +1,11 @@
+{
+  "threshold": 20,
+  "reporters": ["console"],
+  "format": ["bash"],
+  "ignore": ["**/.jscpd/**", "**/.artifacts/**"],
+  "path": ["../../.githooks/"],
+  "minLines": 8,
+  "minTokens": 40,
+  "mode": "strict",
+  "output": ".artifacts/cpd/hooks-bash"
+}

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- SEO:START -->
+    <title>{{PAGE_TITLE}}</title>
+    <!-- SEO:END -->
+
+    <script src="/config/site.js?v={{BUILD_VERSION}}"></script>
+    <script src="{{CONFIG_PATH}}?v={{BUILD_VERSION}}"></script>
+    <script src="/shared/seo.js?v={{BUILD_VERSION}}"></script>
+
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="stylesheet" href="/styles.css?v={{BUILD_VERSION}}" />
+
+    <script src="/shared/consent.js?v={{BUILD_VERSION}}"></script>
+    <script src="/config/analytics.js?v={{BUILD_VERSION}}"></script>
+    <script src="/shared/analytics.js?v={{BUILD_VERSION}}"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container site-header-inner">
+        <a href="/" class="site-brand">{{SITE_NAME}}</a>
+        <nav class="site-nav" aria-label="{{NAV_ARIA_LABEL}}">{{NAV_LINKS}}</nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-section" id="get-started">
+        <div class="container hero-content">
+          <p class="hero-eyebrow">{{HERO_EYEBROW}}</p>
+          <h1 class="hero-title">{{HERO_TITLE}}</h1>
+          <p class="hero-description">{{HERO_DESCRIPTION}}</p>
+
+          <div class="hero-cta">
+            <a
+              class="btn btn-primary"
+              href="{{PRIMARY_CTA_URL}}"
+              data-track-cta="{{PRIMARY_CTA_LABEL}}"
+              >{{PRIMARY_CTA_LABEL}}</a
+            >
+            <a
+              class="btn btn-secondary"
+              href="{{SECONDARY_CTA_URL}}"
+              data-track-cta="{{SECONDARY_CTA_LABEL}}"
+              >{{SECONDARY_CTA_LABEL}}</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="features-section" id="features">
+        <div class="container">
+          <h2 class="section-title">{{FEATURES_SECTION_TITLE}}</h2>
+          <div class="feature-grid">{{FEATURE_CARDS}}</div>
+        </div>
+      </section>
+
+      <section class="contact-section" id="contact">
+        <div class="container">
+          <h2 class="section-title">{{CONTACT_SECTION_TITLE}}</h2>
+          <p class="contact-text">
+            {{CONTACT_TEXT_PREFIX}}
+            <a href="mailto:{{CONTACT_EMAIL}}">{{CONTACT_EMAIL}}</a>{{CONTACT_TEXT_SUFFIX}}
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer-section">
+      <div class="container footer-inner">
+        <p class="footer-meta">{{FOOTER_OPERATED_BY}}</p>
+        <div class="footer-links">
+          <a href="/terms" class="footer-link">{{FOOTER_TERMS_LABEL}}</a>
+          <a href="/privacy" class="footer-link">{{FOOTER_PRIVACY_LABEL}}</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

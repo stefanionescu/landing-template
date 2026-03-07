@@ -1,0 +1,25 @@
+# Baseline for existing complexity debt and parser false positives.
+# Keep entries scoped to known legacy hotspots; remove when refactored.
+
+# Path resolution currently handles many fallback branches and extension variants.
+server.js:resolveFilePath
+
+# Markdown parser and build pipeline are monolithic legacy transforms.
+build/steps/legal.js:parseMarkdown
+build/steps/landing.js:build
+build/steps/landing.js:(anonymous)
+build/steps/landing.js:buildSeoBlock
+
+# Shared frontend/bootstrap functions currently bundle multiple state transitions.
+shared/seo.js:(anonymous)
+shared/analytics.js:initMixpanel
+shared/analytics.js:(anonymous)
+shared/consent.js:showBanner
+
+# Shared linting utilities with intentionally broad rule parsing.
+linting/shell/structure/util.js:analyzeDirectory
+linting/shell/docs.js:collectViolations
+linting/shell/unused-functions.js:stripComments
+linting/shell/unused-functions.js:splitShellWords
+linting/shell/unused-functions.js:main
+linting/package/json.js:fixBlankLines

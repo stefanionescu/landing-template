@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Skip if hooks are disabled.
+if [[ "${SKIP_HOOKS:-0}" == "1" ]] || [[ "${SKIP_COMMITLINT:-0}" == "1" ]]; then
+  exit 0
+fi
+
+bunx commitlint --edit "$1"

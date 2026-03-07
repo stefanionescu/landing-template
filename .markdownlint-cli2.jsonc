@@ -1,0 +1,73 @@
+{
+  "customRules": [
+    "markdownlint-rule-extended-ascii",
+    "./linting/markdownlint/heading-title-case.cjs",
+    "./linting/markdownlint/no-banned-terms.cjs",
+    "./linting/markdownlint/no-double-hyphen.cjs",
+  ],
+  "config": {
+    "default": true,
+
+    // Custom rule set
+    "heading-title-case": true,
+    "no-banned-terms": true,
+    "no-double-hyphen": true,
+
+    // MD013: line length
+    "MD013": false,
+
+    // MD031: fenced code blocks should be surrounded by blank lines
+    "MD031": false,
+
+    // MD032: lists should be surrounded by blank lines
+    "MD032": false,
+
+    // MD034: no bare URLs
+    "MD034": false,
+
+    // MD036: no emphasis used as heading
+    "MD036": false,
+
+    // MD040: fenced code blocks should have a language
+    "MD040": false,
+
+    // MD024: allow duplicate headings in different sections
+    "MD024": {
+      "siblings_only": true,
+    },
+
+    // MD033: allow inline HTML
+    "MD033": false,
+
+    // MD041: first line should be a heading
+    "MD041": true,
+
+    // MD046: code block style
+    "MD046": {
+      "style": "fenced",
+    },
+
+    // MD048: fenced code block marker style
+    "MD048": {
+      "style": "backtick",
+    },
+
+    // MD049: emphasis style
+    "MD049": false,
+
+    // MD050: strong emphasis style
+    "MD050": {
+      "style": "asterisk",
+    },
+
+    // MD060: table column style
+    "MD060": false,
+  },
+  "globs": [
+    "**/*.md",
+    "!**/node_modules/**",
+    "!**/build/**",
+    "!**/.wrangler/**",
+    "!**/.artifacts/**",
+  ],
+}

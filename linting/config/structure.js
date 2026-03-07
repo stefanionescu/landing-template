@@ -1,0 +1,4 @@
+export const STRUCTURE_PREFIX_DELIMITERS = ['-', '.'];
+export const STRUCTURE_DIRECTORY_CACHE_SEPARATOR = '::';
+export const STRUCTURE_SKIP_INDEX_BASENAME = 'index';
+export const STRUCTURE_SKIP_HIDDEN_DIRECTORIES = true;

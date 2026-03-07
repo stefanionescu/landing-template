@@ -1,0 +1,9 @@
+{
+  "name": "Landing Template",
+  "short_name": "Landing",
+  "display": "standalone",
+  "start_url": "/",
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
+  "icons": []
+}

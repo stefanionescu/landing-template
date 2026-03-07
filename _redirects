@@ -1,0 +1,11 @@
+# Cloudflare Pages redirects
+
+# Legal pages
+/privacy /pages/legal/privacy/ 200
+/terms /pages/legal/terms/ 200
+
+# Add additional landing pages here (example)
+# /pricing /pages/landing/pricing/ 200
+
+# Root page
+/ /pages/landing/default/ 200

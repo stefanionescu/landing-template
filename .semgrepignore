@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Generated/build outputs
+.wrangler/
+.artifacts/
+linting/.tools/
+pages/landing/*/index.html
+pages/legal/*/index.html
+sitemap.xml
+
+# Static/binary assets
+assets/
+**/*.png
+**/*.webp
+**/*.jpg
+**/*.jpeg
+**/*.gif
+**/*.svg
+**/*.ico
+**/*.mp4
+**/*.webm
+
+# Tooling caches and local metadata
+.claude/
+.vscode/
+.idea/
+.DS_Store

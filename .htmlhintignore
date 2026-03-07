@@ -1,0 +1,4 @@
+node_modules/**
+.wrangler/**
+pages/landing/*/index.html
+pages/legal/*/index.html

@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+#
+# Pre-commit hook orchestrator
+#
+# Bypass:
+#   git commit --no-verify
+#   SKIP_HOOKS=1
+#   SKIP_ENV_CHECK=1
+#   SKIP_REPO_LINT=1
+#   SKIP_KNIP=1
+#   SKIP_TYPOS=1
+#   SKIP_LINT_PKG=1
+#   SKIP_HOOKS_SELF=1
+#
+
+set -uo pipefail
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+HOOKS_DIR="$ROOT_DIR/.githooks/hooks"
+
+source "$ROOT_DIR/.githooks/lib/runtime.sh"
+
+if [[ "${SKIP_HOOKS:-0}" == "1" ]]; then
+  exit 0
+fi
+
+FAILED=0
+
+OUTPUT=$(run_with_timeout "$TIMEOUT_GLOBAL_CHECKS" "$HOOKS_DIR/global/security.sh" --mode=commit 2>&1)
+STATUS=$?
+if [ $STATUS -ne 0 ]; then
+  echo -e "${RED}[pre-commit] env guard${NC}"
+  [ -n "$OUTPUT" ] && echo "$OUTPUT"
+  exit 1
+fi
+
+if [[ "${SKIP_REPO_LINT:-0}" != "1" ]]; then
+  OUTPUT=$(run_with_timeout "$TIMEOUT_GLOBAL_CHECKS" "$HOOKS_DIR/global/lint.sh" --mode=commit 2>&1)
+  STATUS=$?
+  if [ $STATUS -ne 0 ]; then
+    echo -e "${RED}[pre-commit] repo lint${NC}"
+    [ -n "$OUTPUT" ] && echo "$OUTPUT"
+    FAILED=1
+  fi
+fi
+
+HOOK_PIDS=()
+HOOK_NAMES=()
+HOOK_TMPDIR=$(mktemp -d)
+
+# run_hook_bg - Launches a hook script in the background and captures output.
+run_hook_bg() {
+  local name="$1" skip_var="$2" script="$3"
+  shift 3
+  if [ "${!skip_var:-0}" = "1" ] || [ ! -x "$script" ]; then
+    return
+  fi
+  local idx=${#HOOK_PIDS[@]}
+  HOOK_NAMES+=("$name")
+  "$script" "$@" >"$HOOK_TMPDIR/$idx.out" 2>&1 &
+  HOOK_PIDS+=($!)
+}
+
+run_hook_bg "[pre-commit] hooks lint" "SKIP_HOOKS_SELF" "$HOOKS_DIR/self/lint.sh"
+run_hook_bg "[pre-commit] hooks security" "SKIP_HOOKS_SELF" "$HOOKS_DIR/self/security.sh"
+run_hook_bg "[pre-commit] hooks format" "SKIP_HOOKS_SELF" "$HOOKS_DIR/self/format.sh"
+run_hook_bg "[pre-commit] hooks quality" "SKIP_HOOKS_SELF" "$HOOKS_DIR/self/quality.sh"
+
+if [[ ${#HOOK_PIDS[@]} -gt 0 ]]; then
+  (
+    sleep "$TIMEOUT_PARALLEL_HOOKS"
+    for pid in "${HOOK_PIDS[@]}"; do
+      kill "$pid" 2>/dev/null
+    done
+  ) &
+  WATCHDOG_PID=$!
+fi
+
+for idx in "${!HOOK_PIDS[@]}"; do
+  if ! wait "${HOOK_PIDS[$idx]}"; then
+    OUTPUT=$(cat "$HOOK_TMPDIR/$idx.out" 2>/dev/null)
+    if [ "$OUTPUT" != "skip" ]; then
+      echo -e "${RED}${HOOK_NAMES[$idx]}${NC}"
+      [ -n "$OUTPUT" ] && echo "$OUTPUT"
+      FAILED=1
+    fi
+  fi
+done
+rm -rf "$HOOK_TMPDIR"
+
+if [[ -n "${WATCHDOG_PID:-}" ]]; then
+  kill "$WATCHDOG_PID" 2>/dev/null
+  wait "$WATCHDOG_PID" 2>/dev/null
+fi
+
+if [[ "$FAILED" -eq 1 ]]; then
+  echo -e "${RED}Commit blocked. Bypass: git commit --no-verify${NC}"
+  exit 1
+fi
+
+exit 0
