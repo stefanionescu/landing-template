@@ -65,6 +65,7 @@ export default [
       '**/node_modules/**',
       '**/.wrangler/**',
       '.artifacts/**',
+      'dist/**',
       'pages/landing/*/index.html',
       'pages/legal/*/index.html',
       'sitemap.xml',
