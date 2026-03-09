@@ -26,8 +26,8 @@ Static site generator for landing pages. Define pages in JS config, build to sta
 flowchart TD
     A["config/pages/*.js\n(page definitions)"] --> C["build/generate.js"]
     B["pages/landing/template.html\n(shared HTML template)"] --> C
-    C --> D["pages/landing/‹slug›/index.html"]
-    C --> E["pages/legal/‹slug›/index.html"]
+    C --> D["pages/landing/slug/index.html"]
+    C --> E["pages/legal/slug/index.html"]
     C --> F["sitemap.xml"]
     D --> G["Static host\n(Cloudflare Pages, etc.)"]
     E --> G
