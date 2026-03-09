@@ -44,6 +44,13 @@ var config = {
       footerTermsLabel: 'Terms',
       footerPrivacyLabel: 'Privacy',
     },
+    consent: {
+      ariaLabel: 'Cookie consent',
+      message:
+        'We use analytics cookies to improve this site. You can accept or reject optional tracking.',
+      rejectLabel: 'Reject all',
+      acceptLabel: 'Accept all',
+    },
   },
 
   schema: {

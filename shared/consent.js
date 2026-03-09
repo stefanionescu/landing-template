@@ -55,20 +55,40 @@
     });
   }
 
+  function getConsentCopy() {
+    var siteConfig = window.LANDING_SITE;
+    var copy = siteConfig && siteConfig.copy && siteConfig.copy.consent;
+    return copy || {};
+  }
+
   function showBanner() {
     if (document.getElementById('consent-banner')) return;
+
+    var copy = getConsentCopy();
+    var ariaLabel = copy.ariaLabel || 'Cookie consent';
+    var message =
+      copy.message ||
+      'We use analytics cookies to improve this site. You can accept or reject optional tracking.';
+    var rejectLabel = copy.rejectLabel || 'Reject all';
+    var acceptLabel = copy.acceptLabel || 'Accept all';
 
     var banner = document.createElement('div');
     banner.id = 'consent-banner';
     banner.className = 'consent-banner';
     banner.setAttribute('role', 'dialog');
-    banner.setAttribute('aria-label', 'Cookie consent');
+    banner.setAttribute('aria-label', ariaLabel);
     banner.innerHTML =
       '<div class="consent-content">' +
-      '<p class="consent-text">We use analytics cookies to improve this site. You can accept or reject optional tracking.</p>' +
+      '<p class="consent-text">' +
+      message +
+      '</p>' +
       '<div class="consent-actions">' +
-      '<button type="button" class="consent-btn consent-btn-reject">Reject all</button>' +
-      '<button type="button" class="consent-btn consent-btn-accept">Accept all</button>' +
+      '<button type="button" class="consent-btn consent-btn-reject">' +
+      rejectLabel +
+      '</button>' +
+      '<button type="button" class="consent-btn consent-btn-accept">' +
+      acceptLabel +
+      '</button>' +
       '</div>' +
       '</div>';
 
