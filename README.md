@@ -10,7 +10,6 @@ Static site generator for landing pages. Define pages in JS config, build to sta
 - [Prerequisites](#prerequisites)
 - [Quickstart](#quickstart)
 - [Key Features](#key-features)
-- [Repository Layout](#repository-layout)
 - [Build Pipeline](#build-pipeline)
 - [Adding a New Landing Page](#adding-a-new-landing-page)
 - [Navigation Setup](#navigation-setup)
@@ -23,22 +22,16 @@ Static site generator for landing pages. Define pages in JS config, build to sta
 
 ## Architecture
 
-```text
-config/pages/*.js          pages/landing/template.html
-  (page definitions)            (shared HTML template)
-        |                              |
-        +----------+  +---------------+
-                   v  v
-             build/generate.js
-                   |
-        +----------+-------------+
-        v          v             v
-  pages/landing/   pages/legal/  sitemap.xml
-  <slug>/index.html <slug>/index.html
-        |          |             |
-        +----------+-------------+
-                   v
-         Static host (Cloudflare Pages, etc.)
+```mermaid
+flowchart TD
+    A["config/pages/*.js\n(page definitions)"] --> C["build/generate.js"]
+    B["pages/landing/template.html\n(shared HTML template)"] --> C
+    C --> D["pages/landing/‹slug›/index.html"]
+    C --> E["pages/legal/‹slug›/index.html"]
+    C --> F["sitemap.xml"]
+    D --> G["Static host\n(Cloudflare Pages, etc.)"]
+    E --> G
+    F --> G
 ```
 
 1. The build reads each page config from `config/pages/*.js` and the shared template from `pages/landing/template.html`.
@@ -71,34 +64,6 @@ Open: `http://localhost:3001`
 - **Legal page generation from Markdown.** Privacy and terms pages are authored in Markdown (`content/privacy.md`, `content/terms.md`) with template placeholders for org name, URLs, and contact emails.
 - **Cloudflare Pages-ready routing.** `_redirects`, `_headers`, and `functions/_middleware.js` are pre-configured for Cloudflare Pages. Adaptable to any static host.
 - **Strict quality gates.** Linting, formatting, complexity analysis, duplication detection, and security scanning are built in. Git hooks enforce checks on commit and push.
-
-## Repository Layout
-
-```text
-+-- 404.html                       Not-found page template
-+-- _headers                       Cloudflare response headers
-+-- _redirects                     Cloudflare route rewrites
-+-- assets/                        Static assets (images, videos, favicons, fonts)
-+-- build/                         Static page generation scripts
-+-- config/
-|   +-- analytics.js               Analytics provider config
-|   +-- legal.js                   Legal page config (org name, emails)
-|   +-- pages/                     Per-page definitions (one file per landing page)
-|   +-- server.js                  Dev server config
-|   +-- site.js                    Site-level defaults (nav, SEO, base URL)
-+-- content/                       Markdown content for legal pages
-+-- functions/                     Cloudflare Pages middleware
-+-- linting/                       Custom lint/security tooling and configs
-+-- pages/
-|   +-- landing/template.html      Main landing page template
-|   +-- landing/default/           Generated default landing output
-|   +-- legal/template.html        Legal page template
-+-- shared/                        Shared browser utilities (SEO, analytics, consent)
-+-- styles.css                     Global styling
-+-- .githooks/                     Commit/push hooks and helper scripts
-```
-
-> `assets/` includes `.gitkeep` files so the directory structure stays visible before you add custom files.
 
 ## Build Pipeline
 
