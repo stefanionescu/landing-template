@@ -1,7 +1,8 @@
 var fs = require('fs');
 var path = require('path');
 
-var ROOT_DIR = path.join(__dirname, '../..');
+var ROOT_DIR = require('../lib/paths').ROOT_DIR;
+var DIST_DIR = require('../lib/paths').DIST_DIR;
 var site = require(path.join(ROOT_DIR, 'config/site.js'));
 
 var LANDING_DIR = path.join(ROOT_DIR, 'pages/landing');
@@ -33,15 +34,15 @@ function build(buildVersion) {
   pageConfigs.forEach(function (file) {
     var slug = file.replace('.js', '');
     var configPath = path.join(PAGES_CONFIG_DIR, file);
-    var htmlPath = path.join(LANDING_DIR, slug, 'index.html');
 
     delete require.cache[require.resolve(configPath)];
     var page = require(configPath);
 
-    var outputDir = path.join(LANDING_DIR, slug);
+    var outputDir = path.join(DIST_DIR, 'pages/landing', slug);
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
+    var htmlPath = path.join(outputDir, 'index.html');
 
     var fullUrl = site.baseUrl + page.path;
 

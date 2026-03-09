@@ -22,7 +22,7 @@
         "lint:html:hint": "htmlhint \"404.html\" \"pages/landing/template.html\" \"pages/legal/template.html\"",
         "lint:html:validate": "concurrently 'bun run lint:html:validate:templates' 'bun run lint:html:validate:generated'",
         "lint:html:validate:templates": "html-validate --config linting/config/html/templates.json \"404.html\" \"pages/landing/template.html\" \"pages/legal/template.html\"",
-        "lint:html:validate:generated": "html-validate --config linting/config/html/generated.json \"pages/landing/*/index.html\" \"pages/legal/*/index.html\"",
+        "lint:html:validate:generated": "html-validate --config linting/config/html/generated.json \"dist/pages/landing/*/index.html\" \"dist/pages/legal/*/index.html\"",
         "lint:html:copy": "node linting/html-copy.mjs",
         "lint:cpd": "concurrently 'jscpd --config .jscpd/js.json' 'jscpd --config .jscpd/css.json' 'jscpd --config .jscpd/bash.json linting'",
         "lint:circular": "madge --circular --extensions js server.js build/index.js build/steps/*.js shared/*.js config/*.js functions/_middleware.js",

@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 
-var ROOT_DIR = path.join(__dirname, '../..');
+var DIST_DIR = require('../lib/paths').DIST_DIR;
 
 function build(entries) {
   var today = new Date().toISOString().split('T')[0];
@@ -18,7 +18,7 @@ function build(entries) {
 
   sitemap += '</urlset>\n';
 
-  fs.writeFileSync(path.join(ROOT_DIR, 'sitemap.xml'), sitemap);
+  fs.writeFileSync(path.join(DIST_DIR, 'sitemap.xml'), sitemap);
 }
 
 module.exports = { build: build };

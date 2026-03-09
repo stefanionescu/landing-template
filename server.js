@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { PORT, MIME_TYPES, ROUTE_PATTERNS, ERRORS, LOG } = require('./config/server');
 
-const ROOT = __dirname;
+const ROOT = path.join(__dirname, 'dist');
 
 function resolveFilePath(urlPath) {
   const cleanPath = urlPath.replace(/\/$/, '') || '/';

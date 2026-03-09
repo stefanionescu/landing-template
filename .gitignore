@@ -7,8 +7,7 @@ node_modules/
 linting/.tools/
 
 # Generated files
-pages/landing/*/index.html
-pages/legal/*/index.html
+dist/
 sitemap.xml
 
 # Environment

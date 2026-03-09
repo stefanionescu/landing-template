@@ -3,6 +3,5 @@ node_modules
 .wrangler
 .artifacts
 linting/.tools
-pages/landing/*/index.html
-pages/legal/*/index.html
+dist
 sitemap.xml

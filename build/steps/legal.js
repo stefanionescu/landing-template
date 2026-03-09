@@ -1,13 +1,14 @@
 var fs = require('fs');
 var path = require('path');
 
-var ROOT_DIR = path.join(__dirname, '../..');
+var ROOT_DIR = require('../lib/paths').ROOT_DIR;
+var DIST_DIR = require('../lib/paths').DIST_DIR;
 var site = require(path.join(ROOT_DIR, 'config/site.js'));
 var legalConfig = require(path.join(ROOT_DIR, 'config/legal.js'));
 
 var CONTENT_DIR = path.join(ROOT_DIR, 'content');
 var TEMPLATE_PATH = path.join(ROOT_DIR, 'pages/legal/template.html');
-var OUTPUT_DIR = path.join(ROOT_DIR, 'pages/legal');
+var OUTPUT_DIR = path.join(DIST_DIR, 'pages/legal');
 
 function build(buildVersion) {
   var template = fs.readFileSync(TEMPLATE_PATH, 'utf-8');
