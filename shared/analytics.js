@@ -2,9 +2,6 @@
   'use strict';
 
   var config = window.ANALYTICS_CONFIG || {};
-  var defaults = window.ANALYTICS_DEFAULTS || {};
-  var mpDefaults = defaults.mixpanel || {};
-  var gaDefaults = defaults.ga || {};
   var mpOverrides = config.mixpanelOptions || {};
 
   var analyticsInitialized = false;
@@ -17,10 +14,7 @@
   var variant = config.variant || detectVariant();
 
   function initMixpanel(token) {
-    var cdnUrl =
-      mpOverrides.cdnUrl ||
-      mpDefaults.cdnUrl ||
-      'https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js';
+    var cdnUrl = mpOverrides.cdnUrl || config.mixpanelCdnUrl;
 
     (function (f, b) {
       if (!b.__SV) {
@@ -85,31 +79,20 @@
       }
     })(document, window.mixpanel || []);
 
-    var debug =
-      mpOverrides.debug !== undefined
-        ? mpOverrides.debug
-        : mpDefaults.debug !== undefined
-          ? mpDefaults.debug
-          : false;
+    var debug = mpOverrides.debug !== undefined ? mpOverrides.debug : config.mixpanelDebug;
     var trackPageview =
       mpOverrides.trackPageview !== undefined
         ? mpOverrides.trackPageview
-        : mpDefaults.trackPageview !== undefined
-          ? mpDefaults.trackPageview
-          : true;
-    var persistence = mpOverrides.persistence || mpDefaults.persistence || 'localStorage';
+        : config.mixpanelTrackPageview;
+    var persistence = mpOverrides.persistence || config.mixpanelPersistence;
     var recordSessionsPercent =
       mpOverrides.recordSessionsPercent !== undefined
         ? mpOverrides.recordSessionsPercent
-        : mpDefaults.recordSessionsPercent !== undefined
-          ? mpDefaults.recordSessionsPercent
-          : 100;
+        : config.mixpanelRecordSessionsPercent;
     var recordMaskTextSelector =
       mpOverrides.recordMaskTextSelector !== undefined
         ? mpOverrides.recordMaskTextSelector
-        : mpDefaults.recordMaskTextSelector !== undefined
-          ? mpDefaults.recordMaskTextSelector
-          : '';
+        : config.mixpanelRecordMaskTextSelector;
 
     mixpanel.init(token, {
       debug: debug,
@@ -129,7 +112,7 @@
       referrer: document.referrer,
     });
 
-    var scrollDepths = mpOverrides.scrollDepths || mpDefaults.scrollDepths || [25, 50, 75, 100];
+    var scrollDepths = mpOverrides.scrollDepths || config.mixpanelScrollDepths;
     var trackedDepths = {};
 
     function getScrollPercent() {
@@ -159,11 +142,9 @@
   }
 
   function initGA(measurementId) {
-    var cdnUrl = gaDefaults.cdnUrl || 'https://www.googletagmanager.com/gtag/js';
-
     var script = document.createElement('script');
     script.async = true;
-    script.src = cdnUrl + '?id=' + measurementId;
+    script.src = config.gaCdnUrl + '?id=' + measurementId;
     document.head.appendChild(script);
 
     window.dataLayer = window.dataLayer || [];

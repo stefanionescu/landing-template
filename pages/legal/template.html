@@ -15,5 +15,25 @@
   </head>
   <body>
     <main class="legal-page">{{CONTENT}}</main>
+
+    <div
+      id="consent-banner"
+      class="consent-banner"
+      role="dialog"
+      aria-label="{{CONSENT_ARIA_LABEL}}"
+      hidden
+    >
+      <div class="consent-content">
+        <p class="consent-text">{{CONSENT_MESSAGE}}</p>
+        <div class="consent-actions">
+          <button type="button" class="consent-btn consent-btn-reject">
+            {{CONSENT_REJECT_LABEL}}
+          </button>
+          <button type="button" class="consent-btn consent-btn-accept">
+            {{CONSENT_ACCEPT_LABEL}}
+          </button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

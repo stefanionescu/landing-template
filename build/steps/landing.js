@@ -20,6 +20,20 @@ var LANDING_COPY_REQUIRED_KEYS = [
   'footerPrivacyLabel',
 ];
 
+function getConsentCopy() {
+  var consentCopy = site.copy && site.copy.consent ? site.copy.consent : {};
+  return consentCopy;
+}
+
+function replaceConsentTokens(html) {
+  var copy = getConsentCopy();
+  return html
+    .replace('{{CONSENT_ARIA_LABEL}}', escapeAttr(copy.ariaLabel || ''))
+    .replace('{{CONSENT_MESSAGE}}', escapeHtml(copy.message || ''))
+    .replace('{{CONSENT_REJECT_LABEL}}', escapeHtml(copy.rejectLabel || ''))
+    .replace('{{CONSENT_ACCEPT_LABEL}}', escapeHtml(copy.acceptLabel || ''));
+}
+
 function build(buildVersion) {
   var template = fs.readFileSync(TEMPLATE_PATH, 'utf-8');
   var landingCopy = getLandingCopy();
@@ -81,6 +95,8 @@ function build(buildVersion) {
       .replace('{{NAV_LINKS}}', buildNavLinks(page))
       .replace('{{FEATURE_CARDS}}', buildFeatureCards(page))
       .replace(/\{\{BUILD_VERSION\}\}/g, buildVersion);
+
+    html = replaceConsentTokens(html);
 
     var seoBlock = buildSeoBlock(page, fullUrl);
     html = html.replace(SEO_MARKER, '<!-- SEO:START -->\n' + seoBlock + '\n    <!-- SEO:END -->');

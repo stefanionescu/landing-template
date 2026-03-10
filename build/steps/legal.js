@@ -32,13 +32,19 @@ function build(buildVersion) {
     var description = escapeHtml(replacePlaceholders(config.description));
     var canonicalUrl = escapeHtml(fullUrl);
 
+    var consentCopy = (site.copy && site.copy.consent) || {};
+
     var html = template
       .replace('{{PAGE_TITLE}}', title)
       .replace('{{META_DESCRIPTION}}', description)
       .replace('{{CANONICAL_URL}}', canonicalUrl)
       .replace(/\{\{THEME_COLOR\}\}/g, site.themeColor)
       .replace(/\{\{BUILD_VERSION\}\}/g, buildVersion)
-      .replace('{{CONTENT}}', content);
+      .replace('{{CONTENT}}', content)
+      .replace('{{CONSENT_ARIA_LABEL}}', escapeHtml(consentCopy.ariaLabel || ''))
+      .replace('{{CONSENT_MESSAGE}}', escapeHtml(consentCopy.message || ''))
+      .replace('{{CONSENT_REJECT_LABEL}}', escapeHtml(consentCopy.rejectLabel || ''))
+      .replace('{{CONSENT_ACCEPT_LABEL}}', escapeHtml(consentCopy.acceptLabel || ''));
 
     var pageDir = path.join(OUTPUT_DIR, name);
     if (!fs.existsSync(pageDir)) {
