@@ -29,6 +29,17 @@ install_fallback() {
     install -m 0755 "${tmp_dir}/${asset}" "${BIN_DIR}/${OSV_SCANNER_TOOL_NAME}"
 }
 
+# Skip when no lock files exist — nothing for the scanner to analyze.
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+has_lockfile=false
+for f in bun.lock package-lock.json yarn.lock pnpm-lock.yaml; do
+    [[ -f "${PROJECT_ROOT}/${f}" ]] && has_lockfile=true && break
+done
+if [[ "${has_lockfile}" == "false" ]]; then
+    echo "no lock file found — skipping osv-scanner"
+    exit 0
+fi
+
 if command -v "${OSV_SCANNER_TOOL_NAME}" >/dev/null 2>&1; then
     exec "${OSV_SCANNER_TOOL_NAME}" "$@"
 fi
