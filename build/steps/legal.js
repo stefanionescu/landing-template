@@ -2,31 +2,39 @@ var fs = require('fs');
 var path = require('path');
 
 var ROOT_DIR = require('../lib/paths').ROOT_DIR;
-var DIST_DIR = require('../lib/paths').DIST_DIR;
+var buildAnalyticsBootstrap = require('../lib/runtime').buildAnalyticsBootstrap;
+var claimPublicPath = require('../lib/public-paths').claimPublicPath;
+var getOutputDir = require('../lib/public-paths').getOutputDir;
+var getOutputHtmlPath = require('../lib/public-paths').getOutputHtmlPath;
+var normalizePublicPath = require('../lib/public-paths').normalizePublicPath;
 var site = require(path.join(ROOT_DIR, 'config/site.js'));
 var legalConfig = require(path.join(ROOT_DIR, 'config/legal.js'));
 
 var CONTENT_DIR = path.join(ROOT_DIR, 'content');
 var TEMPLATE_PATH = path.join(ROOT_DIR, 'pages/legal/template.html');
-var OUTPUT_DIR = path.join(DIST_DIR, 'pages/legal');
 
-function build(buildVersion) {
+function build(buildVersion, occupiedPaths) {
   var template = fs.readFileSync(TEMPLATE_PATH, 'utf-8');
   var pages = Object.keys(legalConfig);
+  var analyticsConfigScript = buildAnalyticsBootstrap();
 
   var sitemapEntries = [];
 
   pages.forEach(function (name) {
     var config = legalConfig[name];
     var mdPath = path.join(CONTENT_DIR, name + '.md');
-    var outputPath = path.join(OUTPUT_DIR, name, 'index.html');
+    var sourceLabel = 'config/legal.js:' + name;
+    var publicPath = normalizePublicPath(config.path, sourceLabel);
+    var outputPath = getOutputHtmlPath(publicPath);
 
     var markdown = fs.readFileSync(mdPath, 'utf-8');
     var content = parseMarkdown(markdown);
 
     content = replacePlaceholders(content);
 
-    var fullUrl = site.baseUrl + config.path;
+    claimPublicPath(occupiedPaths, publicPath, sourceLabel);
+
+    var fullUrl = site.baseUrl + publicPath;
 
     var title = escapeHtml(replacePlaceholders(config.title));
     var description = escapeHtml(replacePlaceholders(config.description));
@@ -40,16 +48,14 @@ function build(buildVersion) {
       .replace('{{CANONICAL_URL}}', canonicalUrl)
       .replace(/\{\{THEME_COLOR\}\}/g, site.themeColor)
       .replace(/\{\{BUILD_VERSION\}\}/g, buildVersion)
+      .replace('__ANALYTICS_CONFIG_SCRIPT__', analyticsConfigScript)
       .replace('{{CONTENT}}', content)
       .replace('{{CONSENT_ARIA_LABEL}}', escapeHtml(consentCopy.ariaLabel || ''))
       .replace('{{CONSENT_MESSAGE}}', escapeHtml(consentCopy.message || ''))
       .replace('{{CONSENT_REJECT_LABEL}}', escapeHtml(consentCopy.rejectLabel || ''))
       .replace('{{CONSENT_ACCEPT_LABEL}}', escapeHtml(consentCopy.acceptLabel || ''));
 
-    var pageDir = path.join(OUTPUT_DIR, name);
-    if (!fs.existsSync(pageDir)) {
-      fs.mkdirSync(pageDir, { recursive: true });
-    }
+    fs.mkdirSync(getOutputDir(publicPath), { recursive: true });
 
     fs.writeFileSync(outputPath, html);
 

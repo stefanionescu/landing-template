@@ -65,7 +65,3 @@ var config = {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = config;
 }
-
-if (typeof window !== 'undefined') {
-  window.LANDING_SITE = config;
-}

@@ -1,52 +1,41 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { PORT, MIME_TYPES, ROUTE_PATTERNS, ERRORS, LOG } = require('./config/server');
+const { PORT, MIME_TYPES, ERRORS, LOG } = require('./config/server');
 
 const ROOT = path.join(__dirname, 'dist');
 
 function resolveFilePath(urlPath) {
-  const cleanPath = urlPath.replace(/\/$/, '') || '/';
+  const safePath = path.resolve(ROOT, '.' + urlPath);
 
-  if (cleanPath === '' || cleanPath === '/') {
-    return path.join(ROOT, 'pages/landing/default/index.html');
+  if (safePath !== ROOT && !safePath.startsWith(ROOT + path.sep)) {
+    return null;
   }
 
-  if (cleanPath === '/terms') {
-    return path.join(ROOT, 'pages/legal/terms/index.html');
-  }
-
-  if (cleanPath === '/privacy') {
-    return path.join(ROOT, 'pages/legal/privacy/index.html');
-  }
-
-  const pageMatch = cleanPath.match(ROUTE_PATTERNS.page);
-  if (pageMatch) {
-    const page = pageMatch[1];
-    const pageIndex = path.join(ROOT, 'pages/landing', page, 'index.html');
-    if (fs.existsSync(pageIndex)) {
-      return pageIndex;
+  try {
+    const stats = fs.statSync(safePath);
+    if (stats.isDirectory()) {
+      return path.join(safePath, 'index.html');
     }
-  }
-
-  const pageFileMatch = cleanPath.match(ROUTE_PATTERNS.pageFile);
-  if (pageFileMatch) {
-    const page = pageFileMatch[1];
-    const file = pageFileMatch[2];
-    const pageDir = path.join(ROOT, 'pages/landing', page);
-    if (fs.existsSync(pageDir)) {
-      return path.join(pageDir, file);
+    if (stats.isFile()) {
+      return safePath;
     }
+  } catch (_error) {
+    // Fall through to the directory-index lookup below.
   }
 
-  return path.join(ROOT, cleanPath);
+  if (path.extname(safePath) !== '') {
+    return safePath;
+  }
+
+  return path.join(safePath, 'index.html');
 }
 
 const server = http.createServer((req, res) => {
   const urlPath = decodeURIComponent(req.url.split('?')[0]);
   const filePath = resolveFilePath(urlPath);
 
-  if (!filePath.startsWith(ROOT)) {
+  if (!filePath) {
     res.writeHead(403);
     res.end(ERRORS.forbidden);
     return;
@@ -72,14 +61,39 @@ server.listen(PORT, () => {
   console.log(LOG.routesHeader);
   console.log(LOG.defaultRoute());
 
-  const pagesDir = path.join(ROOT, 'pages/landing');
-  if (fs.existsSync(pagesDir)) {
-    fs.readdirSync(pagesDir).forEach((entry) => {
-      const pageDir = path.join(pagesDir, entry);
-      if (entry !== 'default' && fs.existsSync(pageDir) && fs.statSync(pageDir).isDirectory()) {
-        console.log(LOG.pageRoute(entry));
-      }
-    });
-  }
+  listRoutes(ROOT).forEach((route) => {
+    if (route !== '/') {
+      console.log(LOG.pageRoute(route));
+    }
+  });
   console.log('');
 });
+
+function listRoutes(startDir) {
+  const routes = [];
+  const stack = [{ dir: startDir, route: '/' }];
+
+  while (stack.length > 0) {
+    const current = stack.pop();
+    const indexPath = path.join(current.dir, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      routes.push(current.route);
+    }
+
+    fs.readdirSync(current.dir, { withFileTypes: true }).forEach((entry) => {
+      if (!entry.isDirectory()) {
+        return;
+      }
+
+      const childRoute =
+        current.route === '/' ? '/' + entry.name : current.route + '/' + entry.name;
+      stack.push({
+        dir: path.join(current.dir, entry.name),
+        route: childRoute,
+      });
+    });
+  }
+
+  routes.sort();
+  return routes;
+}

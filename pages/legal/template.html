@@ -10,7 +10,9 @@
     <meta name="theme-color" content="{{THEME_COLOR}}" />
     <link rel="stylesheet" href="/styles.css?v={{BUILD_VERSION}}" />
     <script src="/shared/consent.js?v={{BUILD_VERSION}}"></script>
-    <script src="/config/analytics.js?v={{BUILD_VERSION}}"></script>
+    <script>
+      __ANALYTICS_CONFIG_SCRIPT__;
+    </script>
     <script src="/shared/analytics.js?v={{BUILD_VERSION}}"></script>
   </head>
   <body>

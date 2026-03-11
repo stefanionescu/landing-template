@@ -3,13 +3,14 @@ export const LINKS_DEFAULT_MODE = 'internal';
 export const LINKS_SUPPORTED_MODES = ['internal', 'external'];
 export const LINKS_USAGE = 'Usage: node linting/links/check.mjs <internal|external>';
 
-export const LINKS_VARIANT_ROOT = 'dist/pages/landing';
-export const LINKS_DEFAULT_VARIANT = 'default';
+export const LINKS_VARIANT_ROOT = 'dist';
 export const LINKS_SEED_ROUTES = ['/', '/terms', '/privacy'];
 
 export const LINKS_SERVER_CMD = 'bun';
 export const LINKS_SERVER_ARGS = ['server.js'];
 export const LINKS_RUNNER_CMD = 'bunx';
+export const LINKS_BUILD_CMD = 'node';
+export const LINKS_BUILD_ARGS = ['build/index.js'];
 
 export const LINKS_TOOL = 'linkinator';
 export const LINKS_BASE_ARGS = [

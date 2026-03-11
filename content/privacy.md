@@ -20,7 +20,7 @@ Last updated: 2026-03-07
 
 ## Third-Party Tools
 
-We may use third-party analytics or error monitoring providers. Configure these in `config/analytics.js` and your page templates.
+We may use third-party analytics or error monitoring providers.
 
 ## Contact
 

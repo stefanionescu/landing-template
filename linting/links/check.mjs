@@ -8,8 +8,9 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import {
   LINKS_BASE_ARGS,
+  LINKS_BUILD_ARGS,
+  LINKS_BUILD_CMD,
   LINKS_DEFAULT_MODE,
-  LINKS_DEFAULT_VARIANT,
   LINKS_ERROR_PREFIX,
   LINKS_EXTERNAL_SKIP_PATTERNS,
   LINKS_EXTERNAL_STATUS_OVERRIDES,
@@ -57,19 +58,38 @@ function runCommand(command, args, options = {}) {
   });
 }
 
-function listVariantRoutes() {
+function listBuiltRoutes() {
   const landingPath = path.join(ROOT, LINKS_VARIANT_ROOT);
   if (!fs.existsSync(landingPath)) {
     return [];
   }
 
-  const variants = fs
-    .readdirSync(landingPath, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && entry.name !== LINKS_DEFAULT_VARIANT)
-    .map((entry) => `/${entry.name}`);
+  const routes = [];
+  const stack = [{ dir: landingPath, route: '/' }];
 
-  variants.sort();
-  return variants;
+  while (stack.length > 0) {
+    const current = stack.pop();
+    const indexPath = path.join(current.dir, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      routes.push(current.route);
+    }
+
+    fs.readdirSync(current.dir, { withFileTypes: true }).forEach((entry) => {
+      if (!entry.isDirectory()) {
+        return;
+      }
+
+      const childRoute =
+        current.route === '/' ? `/${entry.name}` : `${current.route}/${entry.name}`;
+      stack.push({
+        dir: path.join(current.dir, entry.name),
+        route: childRoute,
+      });
+    });
+  }
+
+  routes.sort();
+  return routes;
 }
 
 async function waitForServerReady(url, timeoutMs = LINKS_READY_TIMEOUT_MS) {
@@ -93,7 +113,14 @@ async function waitForServerReady(url, timeoutMs = LINKS_READY_TIMEOUT_MS) {
 }
 
 async function main() {
-  const seedRoutes = [...LINKS_SEED_ROUTES, ...listVariantRoutes()];
+  const buildResult = await runCommand(LINKS_BUILD_CMD, LINKS_BUILD_ARGS, {
+    stdio: 'inherit',
+  });
+  if (buildResult.code !== 0) {
+    process.exit(buildResult.code ?? 1);
+  }
+
+  const seedRoutes = [...LINKS_SEED_ROUTES, ...listBuiltRoutes()];
   const seedUrls = [...new Set(seedRoutes.map((route) => `${BASE_URL}${route}`))];
 
   const server = spawn(LINKS_SERVER_CMD, LINKS_SERVER_ARGS, {

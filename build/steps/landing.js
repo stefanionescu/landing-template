@@ -2,7 +2,10 @@ var fs = require('fs');
 var path = require('path');
 
 var ROOT_DIR = require('../lib/paths').ROOT_DIR;
-var DIST_DIR = require('../lib/paths').DIST_DIR;
+var buildAnalyticsBootstrap = require('../lib/runtime').buildAnalyticsBootstrap;
+var claimPublicPath = require('../lib/public-paths').claimPublicPath;
+var getOutputDir = require('../lib/public-paths').getOutputDir;
+var normalizePublicPath = require('../lib/public-paths').normalizePublicPath;
 var site = require(path.join(ROOT_DIR, 'config/site.js'));
 
 var LANDING_DIR = path.join(ROOT_DIR, 'pages/landing');
@@ -34,10 +37,11 @@ function replaceConsentTokens(html) {
     .replace('{{CONSENT_ACCEPT_LABEL}}', escapeHtml(copy.acceptLabel || ''));
 }
 
-function build(buildVersion) {
+function build(buildVersion, occupiedPaths) {
   var template = fs.readFileSync(TEMPLATE_PATH, 'utf-8');
   var landingCopy = getLandingCopy();
   var resolvedCopy = resolveLandingCopy(landingCopy);
+  var analyticsConfigScript = buildAnalyticsBootstrap();
 
   var pageConfigs = fs.readdirSync(PAGES_CONFIG_DIR).filter(function (file) {
     return file.endsWith('.js');
@@ -46,23 +50,28 @@ function build(buildVersion) {
   var sitemapEntries = [];
 
   pageConfigs.forEach(function (file) {
-    var slug = file.replace('.js', '');
     var configPath = path.join(PAGES_CONFIG_DIR, file);
 
     delete require.cache[require.resolve(configPath)];
     var page = require(configPath);
+    var sourceLabel = 'config/pages/' + file;
+    var publicPath = normalizePublicPath(page.path, sourceLabel);
 
-    var outputDir = path.join(DIST_DIR, 'pages/landing', slug);
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
+    if (page.published === false) {
+      return;
     }
+
+    claimPublicPath(occupiedPaths, publicPath, sourceLabel);
+
+    var outputDir = getOutputDir(publicPath);
+    fs.mkdirSync(outputDir, { recursive: true });
     var htmlPath = path.join(outputDir, 'index.html');
 
-    var fullUrl = site.baseUrl + page.path;
+    var fullUrl = site.baseUrl + publicPath;
 
     var html = template
-      .replace('{{CONFIG_PATH}}', '/config/pages/' + slug + '.js')
       .replace('{{SITE_NAME}}', escapeHtml(site.name || 'Landing Template'))
+      .replace('__ANALYTICS_CONFIG_SCRIPT__', analyticsConfigScript)
       .replace(/\{\{NAV_ARIA_LABEL\}\}/g, escapeHtml(resolvedCopy.navAriaLabel))
       .replace('{{HERO_EYEBROW}}', escapeHtml(page.heroEyebrow || 'Static website template'))
       .replace(
@@ -77,16 +86,16 @@ function build(buildVersion) {
             'Edit config/pages/*.js to customize this page.',
         ),
       )
-      .replace('{{PRIMARY_CTA_LABEL}}', escapeHtml(page.primaryCtaLabel || 'Get Started'))
+      .replace(/\{\{PRIMARY_CTA_LABEL\}\}/g, escapeHtml(page.primaryCtaLabel || 'Get Started'))
       .replace('{{PRIMARY_CTA_URL}}', escapeAttr(page.primaryCtaUrl || '#'))
-      .replace('{{SECONDARY_CTA_LABEL}}', escapeHtml(page.secondaryCtaLabel || 'Learn More'))
+      .replace(/\{\{SECONDARY_CTA_LABEL\}\}/g, escapeHtml(page.secondaryCtaLabel || 'Learn More'))
       .replace('{{SECONDARY_CTA_URL}}', escapeAttr(page.secondaryCtaUrl || '#features'))
       .replace(/\{\{FEATURES_SECTION_TITLE\}\}/g, escapeHtml(resolvedCopy.featuresSectionTitle))
       .replace(/\{\{CONTACT_SECTION_TITLE\}\}/g, escapeHtml(resolvedCopy.contactSectionTitle))
       .replace(/\{\{CONTACT_TEXT_PREFIX\}\}/g, escapeHtml(resolvedCopy.contactTextPrefix))
       .replace(/\{\{CONTACT_TEXT_SUFFIX\}\}/g, escapeHtml(resolvedCopy.contactTextSuffix))
       .replace(
-        '{{CONTACT_EMAIL}}',
+        /\{\{CONTACT_EMAIL\}\}/g,
         escapeHtml((site.emails && site.emails.contact) || 'hello@example.com'),
       )
       .replace(/\{\{FOOTER_OPERATED_BY\}\}/g, escapeHtml(resolvedCopy.footerOperatedBy))
@@ -103,12 +112,10 @@ function build(buildVersion) {
 
     fs.writeFileSync(htmlPath, html);
 
-    if (page.published !== false) {
-      sitemapEntries.push({
-        url: fullUrl,
-        priority: slug === 'default' ? '1.0' : '0.8',
-      });
-    }
+    sitemapEntries.push({
+      url: fullUrl,
+      priority: publicPath === '/' ? '1.0' : '0.8',
+    });
   });
 
   return sitemapEntries;
@@ -172,7 +179,7 @@ function buildFeatureCards(page) {
     {
       title: 'Shared Utilities',
       description:
-        'The template includes optional shared scripts for SEO, analytics, consent, and motion helpers.',
+        'The template includes shared scripts for analytics, consent, and other light runtime helpers.',
     },
     {
       title: 'Strong Tooling',

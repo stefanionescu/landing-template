@@ -7,16 +7,14 @@
     <title>{{PAGE_TITLE}}</title>
     <!-- SEO:END -->
 
-    <script src="/config/site.js?v={{BUILD_VERSION}}"></script>
-    <script src="{{CONFIG_PATH}}?v={{BUILD_VERSION}}"></script>
-    <script src="/shared/seo.js?v={{BUILD_VERSION}}"></script>
-
     <link rel="icon" href="/favicon.ico" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="stylesheet" href="/styles.css?v={{BUILD_VERSION}}" />
 
     <script src="/shared/consent.js?v={{BUILD_VERSION}}"></script>
-    <script src="/config/analytics.js?v={{BUILD_VERSION}}"></script>
+    <script>
+      __ANALYTICS_CONFIG_SCRIPT__;
+    </script>
     <script src="/shared/analytics.js?v={{BUILD_VERSION}}"></script>
   </head>
   <body>

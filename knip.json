@@ -4,7 +4,6 @@
     "server.js",
     "build/index.js",
     "build/steps/*.js",
-    "functions/_middleware.js",
     "config/**/*.js",
     "shared/**/*.js",
     "pages/landing/*/content.js",

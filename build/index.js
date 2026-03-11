@@ -4,6 +4,7 @@ var legal = require('./steps/legal');
 var sitemap = require('./steps/sitemap');
 
 var BUILD_VERSION = Date.now().toString();
+var occupiedPaths = new Set();
 
 copy.cleanDist();
 copy.copyToDist([
@@ -16,9 +17,8 @@ copy.copyToDist([
   '404.html',
   'assets',
   'shared',
-  'config',
 ]);
 
-var landingPages = landing.build(BUILD_VERSION);
-var legalPages = legal.build(BUILD_VERSION);
+var landingPages = landing.build(BUILD_VERSION, occupiedPaths);
+var legalPages = legal.build(BUILD_VERSION, occupiedPaths);
 sitemap.build([].concat(landingPages, legalPages));

@@ -21,11 +21,6 @@ const MIME_TYPES = {
   '.txt': 'text/plain',
 };
 
-const ROUTE_PATTERNS = {
-  page: /^\/([a-zA-Z0-9_-]+)$/,
-  pageFile: /^\/([a-zA-Z0-9_-]+)\/(.+)$/,
-};
-
 const ERRORS = {
   forbidden: 'Forbidden',
   notFound: 'Not Found',
@@ -37,11 +32,11 @@ const LOG = {
   },
   routesHeader: '  Routes:',
   defaultRoute: function () {
-    return '    /         → default page';
+    return '    /';
   },
   pageRoute: function (dir) {
-    return '    /' + dir + '  → landing page';
+    return '    ' + dir;
   },
 };
 
-module.exports = { PORT, MIME_TYPES, ROUTE_PATTERNS, ERRORS, LOG };
+module.exports = { PORT, MIME_TYPES, ERRORS, LOG };
