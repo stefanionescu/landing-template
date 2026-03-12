@@ -66,6 +66,7 @@
   "globs": [
     "**/*.md",
     "!**/node_modules/**",
+    "!**/.tools/**",
     "!**/build/**",
     "!**/.wrangler/**",
     "!**/.artifacts/**",
