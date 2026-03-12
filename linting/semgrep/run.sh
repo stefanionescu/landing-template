@@ -3,7 +3,6 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 CONFIG_FILE="${REPO_ROOT}/linting/config/semgrep.sh"
-VERSIONS_FILE="${REPO_ROOT}/linting/config/security/tool-versions.env"
 
 if [[ ! -f "${CONFIG_FILE}" ]]; then
     echo "error: missing ${CONFIG_FILE}" >&2
@@ -13,23 +12,6 @@ fi
 # lint:justify -- reason: config file sourced at runtime from resolved repo path -- ticket: N/A
 # shellcheck disable=SC1090
 source "${CONFIG_FILE}"
-
-if [[ -f "${VERSIONS_FILE}" ]]; then
-    # lint:justify -- reason: versions file sourced at runtime from resolved repo path -- ticket: N/A
-    # shellcheck disable=SC1090
-    source "${VERSIONS_FILE}"
-    if [[ -n "${SEMGREP_VERSION:-}" ]]; then
-        installed="$(semgrep --version 2>/dev/null || true)"
-        if [[ -n "${installed}" && "${installed}" != "${SEMGREP_VERSION}" ]]; then
-            echo "warning: semgrep version mismatch (installed=${installed}, pinned=${SEMGREP_VERSION})" >&2
-        fi
-    fi
-fi
-
-if ! command -v semgrep >/dev/null 2>&1; then
-    echo "error: semgrep not installed (brew install semgrep)" >&2
-    exit 1
-fi
 
 target="${1:-${SEMGREP_DEFAULT_TARGET}}"
 exit_code=0
@@ -43,7 +25,7 @@ run_target() {
 
     echo "=== semgrep > ${label} ==="
 
-    local semgrep_cmd=(semgrep "${SEMGREP_FLAGS[@]}")
+    local semgrep_cmd=(bash "${REPO_ROOT}/linting/bin/semgrep.sh" "${SEMGREP_FLAGS[@]}")
     semgrep_cmd+=(--config "${REPO_ROOT}/${custom_config}")
 
     for ruleset in "${rulesets_ref[@]}"; do

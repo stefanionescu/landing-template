@@ -60,6 +60,8 @@ This is a static landing page template. There is no framework, no bundler, no Ty
 
 - Node.js `>=20.0.0 <21.0.0`
 - Bun `>=1.2.7` (package manager)
+- Python 3 for repo-local Semgrep/Lizard bootstrapping
+- `curl` and `tar` for repo-local CLI downloads
 
 ### Directory Map
 
@@ -82,9 +84,12 @@ content/              Long-form prose (markdown)
 dist/                 Build output (generated, not checked in)
 functions/            Edge functions (Cloudflare Pages middleware)
 linting/              Custom lint rules, configs, and scripts
+  .tools/             Repo-local pinned CLI cache (bootstrapped, ignored by git)
+  bin/                Repo-local tool wrappers used by lint/hooks/security scripts
   config/             Linting configuration files (html/, security/)
   css-dead.mjs        Dead CSS detection
   html-copy.mjs       HTML copy validation
+  install/            Tool bootstrap helpers for repo-local lint/security CLIs
   license/            License checking
   links/              Link checking (internal and external)
   lizard/             Code complexity analysis (Lizard runner)
@@ -420,6 +425,8 @@ Each commit should be a single logical change. Do not lump unrelated changes int
 ## Git Hooks
 
 Hooks are installed from `.githooks/`. Run `bun run setup:hooks` to set them up.
+That command also bootstraps the pinned repo-local CLI tools used by hooks, lint, and security
+scans under `linting/.tools/`.
 
 ### Hook Directory Structure
 
@@ -470,10 +477,12 @@ Fix the issue. Do not bypass the hook. The hook caught something real.
 ## Linting
 
 Run `bun run lint` to check everything. Run `bun run lint:fix` to auto-fix what can be auto-fixed.
+Run `bun run setup:tooling` once after cloning if the repo-local CLI cache has not been bootstrapped yet.
 
 Linting is a gate, not a suggestion. Every commit must pass lint.
 
 Never weaken, disable, or bypass any linting rule unless explicitly asked. This includes all tools listed below.
+Do not add runtime self-healing downloads to lint commands. Bootstrap pinned local tools first, then run lint.
 
 ### Lint Tools
 
@@ -514,6 +523,8 @@ If JSCPD reports duplication above the threshold, refactor the duplicated code. 
 ## Security Scanning
 
 Run `bun run security:scan` to run all security scans (Gitleaks, OSV, Semgrep).
+Security scans use the pinned repo-local tooling cache in `linting/.tools/`. Bootstrap it with
+`bun run setup:tooling` or `bun run setup:hooks` before relying on those scans.
 
 Run security scans after:
 

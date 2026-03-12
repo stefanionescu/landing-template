@@ -11,9 +11,16 @@ load_security_config "${CONFIG_DIR}" "gitleaks/gitleaks.env"
 
 TOOLS_DIR="${LINTING_DIR}/${SECURITY_TOOLS_RELATIVE_DIR}"
 BIN_DIR="${TOOLS_DIR}/${GITLEAKS_TOOL_NAME}"
+LOCAL_BIN="${BIN_DIR}/${GITLEAKS_TOOL_NAME}"
+VERSION_FILE="${BIN_DIR}/.version"
 
-# install_fallback — Downloads, verifies, and installs a pinned gitleaks release as a local fallback.
-install_fallback() {
+# tool_is_current - Returns success when the local binary matches the pinned version marker.
+tool_is_current() {
+    [[ -x "${LOCAL_BIN}" && -f "${VERSION_FILE}" && "$(<"${VERSION_FILE}")" == "${GITLEAKS_VERSION}" ]]
+}
+
+# install_local - Downloads, verifies, and installs the pinned gitleaks release.
+install_local() {
     require_download_command "${GITLEAKS_TOOL_NAME}"
     mkdir -p "${BIN_DIR}"
     local os arch version asset checksums_asset base_url
@@ -27,17 +34,27 @@ install_fallback() {
     tmp_dir="$(download_and_verify "${base_url}" "${asset}" "${checksums_asset}")"
     trap 'rm -rf "'"${tmp_dir}"'"' RETURN
     tar -xzf "${tmp_dir}/${asset}" -C "${tmp_dir}"
-    install -m 0755 "${tmp_dir}/${GITLEAKS_TOOL_NAME}" "${BIN_DIR}/${GITLEAKS_TOOL_NAME}"
+    install -m 0755 "${tmp_dir}/${GITLEAKS_TOOL_NAME}" "${LOCAL_BIN}"
+    printf '%s\n' "${GITLEAKS_VERSION}" >"${VERSION_FILE}"
 }
 
-if command -v "${GITLEAKS_TOOL_NAME}" >/dev/null 2>&1; then
-    exec "${GITLEAKS_TOOL_NAME}" "$@"
+if [[ "${1:-}" == "bootstrap" ]]; then
+    if ! tool_is_current; then
+        echo "installing local ${GITLEAKS_TOOL_NAME} ${GITLEAKS_VERSION}..." >&2
+        install_local
+    fi
+    exit 0
 fi
 
-FALLBACK_BIN="${BIN_DIR}/${GITLEAKS_TOOL_NAME}"
-if [[ ! -x "${FALLBACK_BIN}" ]]; then
-    echo "installing fallback ${GITLEAKS_TOOL_NAME} ${GITLEAKS_VERSION}..." >&2
-    install_fallback
+if tool_is_current; then
+    exec "${LOCAL_BIN}" "$@"
 fi
 
-exec "${FALLBACK_BIN}" "$@"
+if [[ "${LANDING_BOOTSTRAP_TOOL:-0}" == "1" ]]; then
+    echo "installing local ${GITLEAKS_TOOL_NAME} ${GITLEAKS_VERSION}..." >&2
+    install_local
+    exec "${LOCAL_BIN}" "$@"
+fi
+
+echo "error: ${GITLEAKS_TOOL_NAME} ${GITLEAKS_VERSION} is not bootstrapped. Run: bun run setup:tooling" >&2
+exit 1

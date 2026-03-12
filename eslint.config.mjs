@@ -63,6 +63,7 @@ export default [
   {
     ignores: [
       '**/node_modules/**',
+      '**/.tools/**',
       '**/.wrangler/**',
       '.artifacts/**',
       'dist/**',

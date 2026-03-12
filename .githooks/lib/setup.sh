@@ -2,8 +2,13 @@
 
 set -e
 
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+
 echo "Setting up Git hooks..."
 git config core.hooksPath .githooks
+
+echo "Bootstrapping repo-local lint/security tooling..."
+bash "${ROOT_DIR}/linting/install/bootstrap.sh"
 
 echo "Git hooks installed."
 echo ""

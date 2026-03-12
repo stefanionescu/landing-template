@@ -4,6 +4,7 @@
     "description": "Production-ready template for static landing pages",
     "scripts": {
         "---SETUP---": "-------",
+        "setup:tooling": "bash linting/install/bootstrap.sh",
         "setup:hooks": "./.githooks/lib/setup.sh",
 
         "---BUILD---": "-------",
@@ -60,9 +61,9 @@
 
         "---LINT:SH---": "-------",
         "lint:sh": "concurrently 'bun run lint:sh:check' 'bun run lint:sh:format' 'bun run lint:sh:semgrep' 'bun run lint:sh:dead' 'bun run lint:sh:length' 'bun run lint:sh:justify' 'bun run lint:sh:docs' 'bun run lint:sh:naming' 'bun run lint:sh:structure'",
-        "lint:sh:check": "shellcheck linting/**/*.sh linting/config/security/*.env linting/config/security/gitleaks/*.env",
-        "lint:sh:format": "shfmt -d linting/**/*.sh linting/config/security/*.env linting/config/security/gitleaks/*.env",
-        "lint:sh:semgrep": "semgrep --error --no-rewrite-rule-ids --metrics=off --disable-version-check --config r/bash linting",
+        "lint:sh:check": "bash linting/bin/shellcheck.sh linting/**/*.sh linting/config/security/*.env linting/config/security/gitleaks/*.env",
+        "lint:sh:format": "bash linting/bin/shfmt.sh -d linting/**/*.sh linting/config/security/*.env linting/config/security/gitleaks/*.env",
+        "lint:sh:semgrep": "bash linting/bin/semgrep.sh --error --no-rewrite-rule-ids --metrics=off --disable-version-check --exclude 'linting/.tools/**' --config r/bash linting",
         "lint:sh:dead": "node linting/shell/unused-functions.js --scope linting",
         "lint:sh:length": "node linting/shell/length.js --scope linting",
         "lint:sh:justify": "node linting/shell/disable-justification.js --scope linting",

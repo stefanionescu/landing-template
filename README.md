@@ -41,6 +41,8 @@ flowchart TD
 
 - Node.js `>=20.0.0 <21.0.0`
 - [Bun](https://bun.sh) `>=1.2.7`
+- Python 3 (for repo-local Semgrep and Lizard bootstrapping)
+- `curl` and `tar` available on `PATH` (for repo-local CLI downloads)
 
 ## Quickstart
 
@@ -52,6 +54,9 @@ npm run start
 ```
 
 Open: `http://localhost:3001`
+
+`setup:hooks` also bootstraps pinned repo-local copies of `shellcheck`, `shfmt`, `semgrep`,
+`lizard`, `gitleaks`, and `osv-scanner` under `linting/.tools/`.
 
 ## Key Features
 
@@ -161,6 +166,13 @@ Edit `content/privacy.md` and `content/terms.md`. Template placeholders supporte
 
 ## Quality and Security
 
+Install the repo-local tooling once after cloning if you want lint, hooks, or security scans
+without installing those CLIs globally:
+
+```bash
+npm run setup:tooling
+```
+
 ```bash
 npm run lint
 npm run lint:fix
@@ -175,7 +187,9 @@ npm run security:scan
 npm run setup:hooks
 ```
 
-Hooks run lint and security checks on commit and push. Bypass options are listed by `setup:hooks` output.
+`setup:hooks` installs the Git hook path and bootstraps the repo-local lint/security tooling.
+Hooks run lint and security checks on commit and push. Bypass options are listed by
+`setup:hooks` output.
 
 ## Deployment
 

@@ -19,14 +19,6 @@ LIZARD_FLAGS=(
 target="${1:-all}"
 exit_code=0
 
-# require_lizard - Exits with an error if the lizard CLI is not installed.
-require_lizard() {
-    if ! command -v lizard >/dev/null 2>&1; then
-        echo "error: lizard is not installed. Run: brew install lizard" >&2
-        exit 1
-    fi
-}
-
 # run_project - Runs lizard for a project, loading its .whitelizard if present.
 run_project() {
     local label="$1"
@@ -40,7 +32,7 @@ run_project() {
     fi
 
     echo "=== lizard > ${label} ==="
-    lizard "${flags[@]}" "${dirs[@]}" || exit_code=1
+    bash "${REPO_ROOT}/linting/bin/lizard.sh" "${flags[@]}" "${dirs[@]}" || exit_code=1
 }
 
 # run_runtime - Runs lizard complexity analysis on runtime JS code.
@@ -60,10 +52,18 @@ run_hooks() {
 
 # run_linting - Runs lizard complexity analysis on linting scripts.
 run_linting() {
-    run_project "linting" ".whitelizard" "linting/"
-}
+    local linting_files=()
+    while IFS= read -r file_path; do
+        linting_files+=("${file_path}")
+    done < <(
+        find "linting" \
+            -path "linting/.tools" -prune -o \
+            -type f \( -name '*.js' -o -name '*.mjs' -o -name '*.cjs' -o -name '*.sh' \) \
+            -print
+    )
 
-require_lizard
+    run_project "linting" ".whitelizard" "${linting_files[@]}"
+}
 
 # cd so lizard reports relative paths (needed for whitelist matching).
 cd "$REPO_ROOT"
